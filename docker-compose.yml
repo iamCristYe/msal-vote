@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+    PostgreSQL:
+        image: "postgres:${POSTGRES_VERSION}"
+        restart: always
+        volumes:
+            - db-data:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+        environment:
+            # default username: postgres
+            # to connect to postgres, either run:
+            # docker exec -it msal-vote_PostgreSQL_1 psql -Upostgres
+            # or:
+            # sudo apt install postgresql-client
+            # psql -h localhost -U postgres
+            POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+
+volumes:
+    db-data:

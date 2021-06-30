@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Add emails</title>
+</head>
+
+<body>
+    <div id="message">
+        You can add valid voters' emails in the following text box.
+
+    </div>
+    <br>
+    <form id="form">
+
+        <textarea style="width:100%;height:100px;"></textarea>
+
+    </form>
+    <br>
+
+    <div class="link"><a id="submit_link" onclick="submit()" href="#">Submit</a></div>
+
+
+    <script>
+        function submit() {
+            document.getElementById("message").innerText = "saving..."
+            document.getElementById("form").style.display = "none"
+            document.getElementById("submit_link").style.display = "none"
+            fetch("/add", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: document.getElementsByTagName("textarea")[0].value
+            }).then(response => response.text()).then(data => {
+                document.getElementById("message").innerText = data;
+            });
+        };
+    </script>
+    <style>
+        body {
+            background-color: #6e128e;
+            /* background-color: #7e2483; */
+            /* background-color: #812990; */
+            /* background-color: #7f338e; */
+            color: white;
+            margin: 20vh 20vw;
+            font-size: 5vw;
+            width: 60vw;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+
+        #message a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        fieldset {
+            border-width: 0px;
+            padding: 0;
+            margin: 0
+        }
+
+        input[type="radio"i] {
+            width: 3vw;
+            height: 3vw;
+            background-color: initial;
+            cursor: default;
+            appearance: auto;
+            box-sizing: border-box;
+            margin: 0 3vw;
+            padding: initial;
+            border: initial;
+        }
+
+        input[type="checkbox"i] {
+            width: 3vw;
+            height: 3vw;
+            background-color: initial;
+            cursor: default;
+            appearance: auto;
+            box-sizing: border-box;
+            margin: 0 3vw;
+            padding: initial;
+            border: initial;
+        }
+
+        #form {
+            color: white;
+            font-size: 5vw;
+            width: 60vw;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .link a {
+            color: white;
+
+        }
+    </style>
+</body>
