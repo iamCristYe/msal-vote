@@ -1,0 +1,50 @@
+# msal-vote: simple online voting app
+
+msal-vote is designed for transforming an offline one-man-one-vote election system to online mode. This app uses the msal library to allow you authenticating **any user** with a personal Microsoft Account or a work/school AD account. You can simply fork the repo and then **deploy the app for free** on Heroku, as it's using Node.js and PostgreSQL.
+
+### Deployment using Heroku
+
+1. Get an GitHub account, fork/import this repo. Edit `views/vote.ejs` to change the questions for catering your own circumstances.
+
+2. Get an Heroku account, create an app using the free plan and add a free PostgreSQL database. Mark down your app name for later use.
+
+3. Sign in to Azure Portal and register your voting app at https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade Supported account types can be `Accounts in any organizational directory (Any Azure AD directory - Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)` and redirect URL would be `https://YOUR_APP_NAME.herokuapp.com/redirect` In `Certificates & secrets` Create a new client secrets, mark down the Client Secret Value and the client ID for later use. You may refer to `Step 1: Register your application` in https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-nodejs-webapp-msal for details.  
+
+4. Go to Heroku Dashboard, in the Settings tab, add at least the following configs for your app:
+
+    1.`ADMIN`: a list of admins that can add voters' emails. Should be separated by comma with no space. Example: `email@example.com,contact@example.org,admin@example.net`
+
+    2.`MSAL_REDIRECT_URI`: `https://YOUR_APP_NAME.herokuapp.com/redirect`
+
+    3.`MSAL_CLIENTID`: a Azure App Client UUID obtained from Microsoft
+
+    4.`MSAL_CLIENTSECRET`: the Client Secret mentioned above
+
+    5.`SESSION_SECRET`: a random alphabetical string like `3r72gy379y49tg4ry34gu24uy`
+
+    6.`END_TIME`: the time when voting periods ends. should be a UNIX timestamp. You can convert time to UNIX timestamp with Google. Like for `Mon Jul 01 2047 00:00:00 GMT+0800 (Hong Kong Standard Time)` the UNIX timestamp is `2445523200`.
+
+5. Go to Heroku Dashboard, in the Deploy tab, choose GitHub and link that repo. You may enable Automatic Deploys for auto deploy your repo if you change something later.
+
+6. Your app is ready at `https://YOUR_APP_NAME.herokuapp.com/`. You can add valid voters' email at `https://YOUR_APP_NAME.herokuapp.com/add`.
+
+### Q&A
+
+1. How do you verify voter's identity?
+
+    The identity is verified by Microsoft and passed back by M$ to the application. It's not provided by the voters themselves.
+
+2. Why don't use prepared statement for adding the vote?
+
+    Unluckily I failed to find a way to combine the prepared statement with the DO Function. If you know how to do it, feel free to PR.
+
+3. Why is your vote not verified backend?
+
+    I don't have time to create a such a complicated system with a full CMS and dedicated backend verifying system. Plus, the malicious vote can be easily spotted. As long as one can only vote once, this would not be a problem.
+
+4. Why don't you do prepare for CSRF attack?
+    Again, I don't have time to implement this. Also again, ss long as one can only vote once, this would not be a problem. Free feel to PR though.
+
+### Local Development
+
+An `.env.example` file is provided for your reference. You can use the `docker-compose.yml` in the repo for setting up a PostgreSQL database.To access the database, either run `docker exec -it msal-vote_PostgreSQL_1 psql -Upostgres` or `sudo apt install postgresql-client; psql -h localhost -U postgres`.

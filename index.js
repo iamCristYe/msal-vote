@@ -89,10 +89,10 @@ app.get('/', async (req, res) => {
     });
     let time = END_TIME_MS.toLocaleString("en-GB", { timeZone: TIMEZONE, year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })
     if (Math.round(new Date().getTime() / 1000) > END_TIME_UNIX) {
-        let query_reslut = `SELECT * FROM ${TABLENAME_VOTE};`
-        let text = `Voting has ended on ${time} (${TIMEZONE}). Here are the results:<br><br>`
+        let query_result = `SELECT * FROM ${TABLENAME_VOTE};`
+        let text = `Voting has ended on ${time} (${TIMEZONE}). Here are the unverified raw results:<br><br>`
 
-        await pool.query(query_reslut).then((pgres, pgerr) => {
+        await pool.query(query_result).then((pgres, pgerr) => {
 
             for (let index = 0; index < pgres.rows.length; index++) {
                 text += `${pgres.rows[index].id}<br>${pgres.rows[index].votes}<br><br>`

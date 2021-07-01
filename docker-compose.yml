@@ -9,12 +9,6 @@ services:
         ports:
             - 5432:5432
         environment:
-            # default username: postgres
-            # to connect to postgres, either run:
-            # docker exec -it msal-vote_PostgreSQL_1 psql -Upostgres
-            # or:
-            # sudo apt install postgresql-client
-            # psql -h localhost -U postgres
             POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
 
 volumes:
