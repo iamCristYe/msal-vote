@@ -156,7 +156,7 @@ app.get('/redirect', async (req, res) => {
     }).catch((error) => {
         console.log(error);
         res.render("message.ejs", {
-            message: `Something went wrong. Please open <a href="/">homepage</a> in incognito window and try again.`
+            message: `Something went wrong. Please open <a href="/">homepage</a> in an incognito window and try again.`
         });
         return;
     });
@@ -166,7 +166,7 @@ app.get("/vote", async (req, res) => {
     if (!req.session.email) {
         console.log("no session email found")
         res.render("message.ejs", {
-            message: `Something went wrong. Please open <a href="/">homepage</a> in incognito window and try again.`
+            message: `Something went wrong. Please open <a href="/">homepage</a> in an incognito window and try again.`
         });
         return;
     }
@@ -179,15 +179,15 @@ app.get("/vote", async (req, res) => {
         if (pgerr) {
             console.error(pgerr);
             res.render("message.ejs", {
-                message: `Something went wrong. Please open <a href="/">homepage</a> in incognito window and try again.`
+                message: `Something went wrong. Please open <a href="/">homepage</a> in an incognito window and try again.`
             });
             return;
         }
         try {
             if (pgres.rows.length == 0) {
                 res.render("message.ejs", {
-                    message: `You (authenticated as ${req.session.email}) is not allowed to vote.
-                    <br><br>If you wish to authenticate using another email, Please open <a href="/">homepage</a> in incognito window and try again.
+                    message: `You (authenticated as ${req.session.email}) are not allowed to vote.
+                    <br><br>If you wish to be authenticated using another email, Please open <a href="/">homepage</a> in an incognito window and try again.
                     <br><br>If you think this is a mistake, please contact ${ADMIN_ARRAY[0]} for details.`
                 });
                 return;
@@ -212,7 +212,7 @@ app.get("/vote", async (req, res) => {
         } catch (error) {
             console.log(error);
             res.render("message.ejs", {
-                message: `Something went wrong. Please open <a href="/">homepage</a> in incognito window and try again.`
+                message: `Something went wrong. Please open <a href="/">homepage</a> in an incognito window and try again.`
             });
             return;
         }
@@ -223,33 +223,58 @@ app.post("/vote", async (req, res) => {
     if (!req.session.email) {
         console.log("no session email found")
         res.render("message.ejs", {
-            message: `Something went wrong. Please open <a href="/">homepage</a> in incognito window and try again.`
+            message: `Something went wrong. Please open <a href="/">homepage</a> in an incognito window and try again.`
         });
         return;
     }
 
     let toInsert = String(req.body).replace(/[\"\'\{\}\/\\[\]\:\|\<>\+\=\;\,\?\*]/g, " ")
 
-    pool.query(`do $$ 
-                begin
-                if exists (select from ${TABLENAME_USER} where email='${req.session.email}' and voted=false) then 
-                    insert into ${TABLENAME_VOTE} (votes) values ('${toInsert}'); 
-                    update ${TABLENAME_USER} set voted=true where email='${req.session.email}';
-                end if;
-                end $$;`, async (pgerr, pgres) => {
 
-        if (pgerr) {
-            console.log(pgerr);
-        }
-        else {
-            //await new Promise((resolve => setTimeout(resolve, 1000)));
-            //let's save time by return attackers with success
-            res.status(200).send("Your vote has been saved if you havn't voted elsewhere. You can now close this page.");
-        }
+    const client = await pool.connect()
+    try {
+        await client.query('BEGIN')
+        await client.query(`LOCK TABLE ${TABLENAME_USER}`)
 
-    })
+        let query = `SELECT * FROM ${TABLENAME_USER} WHERE email='${req.session.email}'`
+        await client.query(query).then((pgres, pgerr) => {
+            if (pgerr) {
+                console.error(pgerr);
+                throw "Something went wrong. Please try again.";
+            }
+            if (pgres.rows.length == 0) {
+                throw "You are not allowed to vote.";
+            }
+            if (pgres.rows[0].voted) {
+                throw "You have already voted.";
+            }
+        });
 
+        query = `update ${TABLENAME_USER} set voted = true where email = '${req.session.email}'`
+        await client.query(query).then((pgres, pgerr) => {
+            if (pgerr) {
+                console.error(pgerr);
+                throw "Something went wrong. Please try again.";
+            }
+        });
 
+        query = `insert into ${TABLENAME_VOTE} (votes) values ($1)`
+        await client.query(query, [toInsert]).then((pgres, pgerr) => {
+            if (pgerr) {
+                console.error(pgerr);
+                throw "Something went wrong. Please try again.";
+            }
+        });
+
+        await client.query('COMMIT');
+        res.status(200).send("Your vote has been saved.");
+    } catch (e) {
+        await client.query('ROLLBACK');
+        res.status(200).send(e);
+    } finally {
+
+        client.release()
+    }
 
 })
 
@@ -258,14 +283,14 @@ app.get("/add", async (req, res) => {
     if (!req.session.email) {
         console.log("no session email found")
         res.render("message.ejs", {
-            message: `Something went wrong. Please open <a href="/">homepage</a> in incognito window and try again.`
+            message: `Something went wrong. Please open <a href="/">homepage</a> in an incognito window and try again.`
         });
         return;
     }
 
     if (ADMIN_ARRAY.indexOf(req.session.email) == -1) {
         res.render("message.ejs", {
-            message: `You are not admin. You should not be here;`
+            message: `You are not admin. You should not be here.`
         });
         return;
     }
@@ -311,6 +336,7 @@ app.post("/add", async (req, res) => {
     await pool.query(query).then(async (pgres, pgerr) => {
         if (pgerr) {
             console.log(pgerr);
+            res.status(200).send("Something went wrong. Please try again.");
         }
         else {
             await new Promise((resolve => setTimeout(resolve, 1000)));
