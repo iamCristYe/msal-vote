@@ -5,6 +5,9 @@
 </head>
 
 <body>
+    <div id="csrfToken" style="display: none">
+        <%= csrfToken %>
+    </div>
     <div id="message">
         Your (authenticated as <%= email %>) can vote only once.
 
@@ -14,28 +17,28 @@
         Q1: Choose your favorite weekday:
         <br>
         <fieldset name="Q1" id="Q1">
-            <label><input type="radio" name="Q1" value="Mon">Mon</label><br>
-            <label><input type="radio" name="Q1" value="Tue">Tue</label><br>
-            <label><input type="radio" name="Q1" value="Wed">Wed</label><br>
-            <label><input type="radio" name="Q1" value="Thu">Thu</label><br>
-            <label><input type="radio" name="Q1" value="Fri">Fri</label><br>
+            <label><input type="radio" name="Q1-Mon" value="">Mon</label><br>
+            <label><input type="radio" name="Q1-Tue" value="">Tue</label><br>
+            <label><input type="radio" name="Q1-Wed" value="">Wed</label><br>
+            <label><input type="radio" name="Q1-Thu" value="">Thu</label><br>
+            <label><input type="radio" name="Q1-Fri" value="">Fri</label><br>
         </fieldset>
         <br>
         Q2: Choose your months you like:
         <br>
         <fieldset id="Q2" name="Q2">
-            <input type="checkbox" name="Q2-January" value="January">January</input><br>
-            <input type="checkbox" name="Q2-February" value="February">February</input><br>
-            <input type="checkbox" name="Q2-March" value="March">March</input><br>
-            <input type="checkbox" name="Q2-April" value="April">April</input><br>
-            <input type="checkbox" name="Q2-May" value="May">May</input><br>
-            <input type="checkbox" name="Q2-June" value="June">June</input><br>
-            <input type="checkbox" name="Q2-July" value="July">July</input><br>
-            <input type="checkbox" name="Q2-August" value="August">August</input><br>
-            <input type="checkbox" name="Q2-September" value="September">September</input><br>
-            <input type="checkbox" name="Q2-October" value="October">October</input><br>
-            <input type="checkbox" name="Q2-November" value="November">November</input><br>
-            <input type="checkbox" name="Q2-December" value="December">December</input><br>
+            <input type="checkbox" name="Q2-January" value="">January</input><br>
+            <input type="checkbox" name="Q2-February" value="">February</input><br>
+            <input type="checkbox" name="Q2-March" value="">March</input><br>
+            <input type="checkbox" name="Q2-April" value="">April</input><br>
+            <input type="checkbox" name="Q2-May" value="">May</input><br>
+            <input type="checkbox" name="Q2-June" value="">June</input><br>
+            <input type="checkbox" name="Q2-July" value="">July</input><br>
+            <input type="checkbox" name="Q2-August" value="">August</input><br>
+            <input type="checkbox" name="Q2-September" value="">September</input><br>
+            <input type="checkbox" name="Q2-October" value="">October</input><br>
+            <input type="checkbox" name="Q2-November" value="">November</input><br>
+            <input type="checkbox" name="Q2-December" value="">December</input><br>
         </fieldset>
     </form>
 
@@ -51,6 +54,7 @@
             vote</a></div>
 
     <script>
+        console.log(document.getElementById("csrfToken").innerText.replaceAll("\n", "").replaceAll(" ", ""))
         function preview() {
             document.getElementById("message").innerText = "Please submit your vote after reivewing:"
             document.getElementById("form").style.display = "none"
@@ -67,6 +71,7 @@
             fetch("/vote", {
                 method: 'POST',
                 headers: {
+                    'CSRF-Token': document.getElementById("csrfToken").innerText.replaceAll("\n", "").replaceAll(" ", ""),
                     'Content-Type': 'text/plain'
                 },
                 body: JSON.stringify(Object.fromEntries(new FormData(document.getElementsByTagName('form')[0]))).replace(/[\"\'\{\}\/\\[\]\:\|\<>\+\=\;\,\?\*]/g, " ")

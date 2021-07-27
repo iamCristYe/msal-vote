@@ -3,6 +3,8 @@ const express = require("express");
 const msal = require('@azure/msal-node');
 const session = require('express-session')
 const MemoryStore = require('memorystore')(session)
+const csrf = require('csurf')
+const csrfProtection = csrf()
 const { Pool } = require('pg')
 
 const pool = new Pool({
@@ -22,7 +24,7 @@ const TIMEZONE = process.env.TIMEZONE || "Asia/Hong_Kong";
 const TABLENAME_USER = process.env.TABLENAME_USER || "users";
 const TABLENAME_VOTE = process.env.TABLENAME_VOTE || "votes";
 
-// user table for 
+
 pool.query(`
 CREATE TABLE IF NOT EXISTS ${TABLENAME_USER} (
     email   TEXT PRIMARY KEY,
@@ -162,7 +164,7 @@ app.get('/redirect', async (req, res) => {
     });
 });
 
-app.get("/vote", async (req, res) => {
+app.get("/vote", csrfProtection, async (req, res) => {
     if (!req.session.email) {
         console.log("no session email found")
         res.render("message.ejs", {
@@ -204,6 +206,7 @@ app.get("/vote", async (req, res) => {
                 else {
                     //console.log(pgres)
                     res.render('vote.ejs', {
+                        csrfToken: req.csrfToken(),
                         email: req.session.email
                     });
                     return;
@@ -219,7 +222,7 @@ app.get("/vote", async (req, res) => {
     });
 })
 
-app.post("/vote", async (req, res) => {
+app.post("/vote", csrfProtection, async (req, res) => {
     if (!req.session.email) {
         console.log("no session email found")
         res.render("message.ejs", {
@@ -279,7 +282,7 @@ app.post("/vote", async (req, res) => {
 })
 
 
-app.get("/add", async (req, res) => {
+app.get("/add", csrfProtection, async (req, res) => {
     if (!req.session.email) {
         console.log("no session email found")
         res.render("message.ejs", {
@@ -294,12 +297,13 @@ app.get("/add", async (req, res) => {
         });
         return;
     }
-
-    res.render('add.ejs');
+    res.render('add.ejs', {
+        csrfToken: req.csrfToken()
+    });
     return;
 })
 
-app.post("/add", async (req, res) => {
+app.post("/add", csrfProtection, async (req, res) => {
     if (!req.session.email) {
         console.log("no session email found")
         res.status(200).send("Please open an incognito window and try again.");
