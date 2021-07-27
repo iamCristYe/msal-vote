@@ -1,5 +1,6 @@
 require('dotenv').config()
 const express = require("express");
+const helmet = require("helmet");
 const msal = require('@azure/msal-node');
 const session = require('express-session')
 const MemoryStore = require('memorystore')(session)
@@ -70,7 +71,7 @@ const pca = new msal.ConfidentialClientApplication(config);
 
 // Create Express App and Routes
 const app = express();
-
+app.use(helmet());
 app.set('view engine', 'ejs');
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -82,6 +83,15 @@ app.use(session({
     saveUninitialized: false
 })) // 300000 milliseconds is 5 min
 app.use(express.text({ type: 'text/plain' }))
+
+app.use((req, res, next) => {
+    if (req.header('host') != "localhost:" + SERVER_PORT && req.header('x-forwarded-proto') !== 'https') {
+        res.redirect(`https://${req.header('host')}${req.url}`)
+    }
+    else {
+        next()
+    }
+})
 
 app.get('/', async (req, res) => {
     let query = `SELECT COUNT(*) FROM ${TABLENAME_VOTE};`
