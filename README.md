@@ -50,6 +50,6 @@ msal-vote is designed for transforming an offline one-man-one-vote election syst
 
 ### Local Development
 
-An `.env.example` file is provided for your reference. To start the server run `npm start`.
+An `.env.example` file is provided for your reference. To start the server run `npx nodemon`.
 
 You can use the `docker-compose.yml` in the repo for setting up a local PostgreSQL database. To access the database, either run `docker exec -it msal-vote_PostgreSQL_1 psql -Upostgres` or `sudo apt install postgresql-client && psql -h localhost -U postgres`.
