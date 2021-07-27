@@ -38,15 +38,15 @@ msal-vote is designed for transforming an offline one-man-one-vote election syst
 
 2. How can it be guaranteed that one can only vote once?
 
-    The user table is locked when one are voting and no other voting can be performed at the same time. When one tried to vote for a second time, they will be spotted.
+    The user table got locked when one is voting and no other voting can be performed at the same time. When one tried to vote for a second time, it will be spotted that s/he has already voted.
 
 3. Why is your vote not verified backend?
 
     I don't have time to create a such a complicated system with a full CMS and dedicated backend verifying system. Plus, the malicious vote can be easily spotted. As long as one can only vote once, this would not be a problem.
 
-4. Why don't you do prepare for CSRF attack?
+4. How do you make sure voters can vote anonymously?
 
-    Again, I don't have time to implement this. Considering the use case of this application, this would not be a problem. Free feel to PR though.
+    Votes are not linked to voters in the database, thus no one will ever know who votes what.
 
 ### Local Development
 
