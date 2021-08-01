@@ -20,11 +20,11 @@ const pool = new Pool({
 
 const ADMIN_ARRAY = process.env.ADMIN.split(",");
 const END_TIME_UNIX = process.env.END_TIME || 2445523200;
-const END_TIME_MS = new Date(END_TIME_UNIX * 1000);
+const END_TIME_MS = new Date(END_TIME_UNIX * 1000);         //MS for millisecond
 const TIMEZONE = process.env.TIMEZONE || "Asia/Hong_Kong";
 const TABLENAME_USER = process.env.TABLENAME_USER || "users";
 const TABLENAME_VOTE = process.env.TABLENAME_VOTE || "votes";
-
+const QUESTION = require('./question.json')
 
 pool.query(`
 CREATE TABLE IF NOT EXISTS ${TABLENAME_USER} (
@@ -71,17 +71,21 @@ const pca = new msal.ConfidentialClientApplication(config);
 
 // Create Express App and Routes
 const app = express();
-app.use(helmet());
+app.use((
+    helmet({
+        contentSecurityPolicy: false,   //being lazy for using inline scripts 
+    })
+));
 app.set('view engine', 'ejs');
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    cookie: { maxAge: 300000 },
+    cookie: { maxAge: 900000 },
     store: new MemoryStore({
-        checkPeriod: 300000
+        checkPeriod: 900000
     }),
     resave: false,
     saveUninitialized: false
-})) // 300000 milliseconds is 5 min
+})) // 900000 milliseconds is 15 min
 app.use(express.text({ type: 'text/plain' }))
 
 app.use((req, res, next) => {
@@ -217,6 +221,7 @@ app.get("/vote", csrfProtection, async (req, res) => {
                     //console.log(pgres)
                     res.render('vote.ejs', {
                         csrfToken: req.csrfToken(),
+                        question: JSON.stringify(QUESTION),
                         email: req.session.email
                     });
                     return;
@@ -241,7 +246,7 @@ app.post("/vote", csrfProtection, async (req, res) => {
         return;
     }
 
-    let toInsert = String(req.body).replace(/[\"\'\{\}\/\\[\]\:\|\<>\+\=\;\,\?\*]/g, " ")
+    let toInsert = String(req.body).replace(/[\"\'\{\}\/\\\[\]\:\|\<\>\+\=\;\,\?\*]/g, " ").replace(/\s+/g, " ").replace(/^ /, "").replace(/ $/, "")
 
 
     const client = await pool.connect()

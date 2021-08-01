@@ -4,7 +4,7 @@ msal-vote is designed for transforming an offline one-man-one-vote election syst
 
 ### Deployment using Heroku
 
-1. Get a GitHub account and fork this repo. Edit `views/vote.ejs` to change the questions according to your own preference.
+1. Get a GitHub account and fork this repo. Edit `question.json` to change the questions according to your own preference.
 
 2. Get a Heroku account, create an app using the free plan and add a free Heroku PostgreSQL database. Mark down your app name for later use.
 

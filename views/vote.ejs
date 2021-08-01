@@ -5,6 +5,9 @@
 </head>
 
 <body>
+    <div id="question" style="display: none">
+        <%= question %>
+    </div>
     <div id="csrfToken" style="display: none">
         <%= csrfToken %>
     </div>
@@ -13,52 +16,47 @@
 
     </div>
     <br>
-    <form id="form">
-        Q1: Choose your favorite weekday:
-        <br>
-        <fieldset name="Q1" id="Q1">
-            <label><input type="radio" name="Q1-Mon" value="">Mon</label><br>
-            <label><input type="radio" name="Q1-Tue" value="">Tue</label><br>
-            <label><input type="radio" name="Q1-Wed" value="">Wed</label><br>
-            <label><input type="radio" name="Q1-Thu" value="">Thu</label><br>
-            <label><input type="radio" name="Q1-Fri" value="">Fri</label><br>
-        </fieldset>
-        <br>
-        Q2: Choose your months you like:
-        <br>
-        <fieldset id="Q2" name="Q2">
-            <input type="checkbox" name="Q2-January" value="">January</input><br>
-            <input type="checkbox" name="Q2-February" value="">February</input><br>
-            <input type="checkbox" name="Q2-March" value="">March</input><br>
-            <input type="checkbox" name="Q2-April" value="">April</input><br>
-            <input type="checkbox" name="Q2-May" value="">May</input><br>
-            <input type="checkbox" name="Q2-June" value="">June</input><br>
-            <input type="checkbox" name="Q2-July" value="">July</input><br>
-            <input type="checkbox" name="Q2-August" value="">August</input><br>
-            <input type="checkbox" name="Q2-September" value="">September</input><br>
-            <input type="checkbox" name="Q2-October" value="">October</input><br>
-            <input type="checkbox" name="Q2-November" value="">November</input><br>
-            <input type="checkbox" name="Q2-December" value="">December</input><br>
-        </fieldset>
-    </form>
+    <form id="form"></form>
 
     <div id="preview"></div>
 
-    <br><br>
-    <div class="link"><a id="preview_link" onclick="preview()" href="#">Preview your vote</a></div>
-
-    <div class="link"><a id="submit_link" onclick="submit()" href="#" style="display: none;">Submit your vote</a></div>
-
+    <div class="link">
+        <a id="preview_link" onclick="preview()" href="#">Preview your vote</a>
+    </div>
     <br>
-    <div class="link"><a id="reset_link" onclick="location.reload()" href="#" style="display: none;">Reset your
-            vote</a></div>
+
+    <div class="link">
+        <a id="submit_link" onclick="submit()" href="#" style="display: none;">Submit your vote</a>
+    </div>
+    <br>
+
+    <div class="link">
+        <a id="reset_link" onclick="location.reload()" href="#" style="display: none;">Reset your vote</a>
+    </div>
+
+
+
+
+
 
     <script>
-        console.log(document.getElementById("csrfToken").innerText.replaceAll("\n", "").replaceAll(" ", ""))
+        const QUESTION = JSON.parse(document.getElementById("question").innerText);
+        window.addEventListener('DOMContentLoaded', (event) => {
+            let resHTML = "";
+            for (let i = 0; i < QUESTION.length; i++) {
+                resHTML += `Q${i + 1}: ${QUESTION[i].question}<br>`;
+                resHTML += `<fieldset id="Q${i + 1}" min="${QUESTION[i].min}" max="${QUESTION[i].max}">`;
+                for (let index = 0; index < QUESTION[i].answer.length; index++) {
+                    resHTML += `<input type="checkbox" name="Q${i + 1}-${QUESTION[i].answer[index][0]}" value="">${QUESTION[i].answer[index][1]}</input><br>`
+                }
+                resHTML += `</fieldset><br>`
+            }
+            document.getElementById("form").innerHTML = resHTML;
+        });
         function preview() {
-            document.getElementById("message").innerText = "Please submit your vote after reivewing:"
+            document.getElementById("message").innerText = "Please submit your vote after reviewing:"
             document.getElementById("form").style.display = "none"
-            document.getElementById("preview").innerText = JSON.stringify(Object.fromEntries(new FormData(document.getElementsByTagName('form')[0]))).replace(/[\"\'\{\}\/\\[\]\:\|\<>\+\=\;\,\?\*]/g, " ");
+            document.getElementById("preview").innerText = JSON.stringify(Object.fromEntries(new FormData(document.getElementsByTagName('form')[0]))).replace(/[\"\'\{\}\/\\\[\]\:\|\<\>\+\=\;\,\?\*]/g, " ").replace(/\s+/g, " ").replace(/^ /, "").replace(/ $/, "")
             document.getElementById("preview_link").style.display = "none"
             document.getElementById("submit_link").style.display = "block"
             document.getElementById("reset_link").style.display = "block"
@@ -74,7 +72,7 @@
                     'CSRF-Token': document.getElementById("csrfToken").innerText.replaceAll("\n", "").replaceAll(" ", ""),
                     'Content-Type': 'text/plain'
                 },
-                body: JSON.stringify(Object.fromEntries(new FormData(document.getElementsByTagName('form')[0]))).replace(/[\"\'\{\}\/\\[\]\:\|\<>\+\=\;\,\?\*]/g, " ")
+                body: JSON.stringify(Object.fromEntries(new FormData(document.getElementsByTagName('form')[0]))).replace(/[\"\'\{\}\/\\\[\]\:\|\<\>\+\=\;\,\?\*]/g, " ").replace(/\s+/g, " ").replace(/^ /, "").replace(/ $/, "")
             }).then(response => response.text()).then(data => {
                 document.getElementById("message").innerText = data;
             });
@@ -88,7 +86,7 @@
             /* background-color: #7f338e; */
             color: white;
             margin: 20vh 20vw;
-            font-size: 5vw;
+            font-size: 5vmin;
             width: 60vw;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
@@ -106,32 +104,32 @@
         }
 
         input[type="radio"i] {
-            width: 3vw;
-            height: 3vw;
+            width: 3vmin;
+            height: 3vmin;
             background-color: initial;
             cursor: default;
             appearance: auto;
             box-sizing: border-box;
-            margin: 0 3vw;
+            margin: 0 3vmin;
             padding: initial;
             border: initial;
         }
 
         input[type="checkbox"i] {
-            width: 3vw;
-            height: 3vw;
+            width: 3vmin;
+            height: 3vmin;
             background-color: initial;
             cursor: default;
             appearance: auto;
             box-sizing: border-box;
-            margin: 0 3vw;
+            margin: 0 3vmin;
             padding: initial;
             border: initial;
         }
 
         #form {
             color: white;
-            font-size: 5vw;
+            font-size: 5vmin;
             width: 60vw;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
