@@ -1,6 +1,8 @@
 [
     {
         "question": "Choose your favorite weekday:",
+        "min": 0,
+        "max": 1,
         "answer": [
             [
                 "Mon",
